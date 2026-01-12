@@ -3,30 +3,66 @@
 import { useState } from "react";
 
 export default function Home() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // ✅ Email format regex
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  // ✅ Form valid condition
+  const isFormValid =
+    email.trim() !== "" && isEmailValid && password.length >= 8;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+    // ❌ Validation errors
+    if (!email) {
+      setError("Email is required");
       return;
     }
 
+    if (!isEmailValid) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
+    // ✅ Start login
     setError("");
-    window.location.href = "/";
+    setLoading(true);
+
+    try {
+      // ⏳ Fake API delay (replace with real backend API)
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // ❌ Example invalid credentials
+      if (email !== "test@gmail.com" || password !== "password123") {
+        throw new Error("Invalid email or password");
+      }
+
+      alert("Login successful ✅");
+
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      
-      {/* CARD */}
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden flex">
 
         {/* LEFT PANEL */}
-        <div className="hidden md:flex w-1/2 bg-white-50 items-center justify-center">
+        <div className="hidden md:flex w-1/2 items-center justify-center">
           <div className="text-center">
             <div className="text-6xl mb-6">🌿</div>
             <h1 className="text-4xl font-bold">Zero Artificial</h1>
@@ -39,15 +75,6 @@ export default function Home() {
         {/* RIGHT PANEL */}
         <div className="w-full md:w-1/2 p-10 md:p-12">
 
-          {/* MOBILE LOGO */}
-          <div className="text-center mb-8 md:hidden">
-            <div className="text-5xl mb-3">🌿</div>
-            <h1 className="text-3xl font-bold">Zero Artificial</h1>
-            <p className="text-gray-600 mt-2">
-              Pure AI. Zero Artificial.
-            </p>
-          </div>
-
           <h2 className="text-2xl font-semibold text-center mb-8">
             Welcome Back! Please Enter Your Details.
           </h2>
@@ -57,25 +84,25 @@ export default function Home() {
             {/* EMAIL */}
             <input
               type="email"
-              name="username"
-              autoComplete="username"
-              required
               placeholder="Email address"
-              className="w-full rounded-lg border px-4 py-3 text-base
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-lg border px-4 py-3
                          focus:outline-none focus:ring-2 focus:ring-black-500"
             />
-            {/* PASSWORD */}
-           <div className="relative">
-  <input
-    type={showPassword ? "text" : "password"}
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    placeholder="Password"
-    className="w-full rounded-lg border px-4 py-3 text-base
-                         focus:outline-none focus:ring-2 focus:ring-black-500"
-  />
 
-  <button
+            {/* PASSWORD */}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-lg border px-4 py-3
+                           focus:outline-none focus:ring-2 focus:ring-black-500"
+              />
+
+              <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="eye-btn"
@@ -117,39 +144,38 @@ export default function Home() {
                   </svg>
                 )}
               </button>
-</div>
+            </div>
 
-
-
+            {/* ERROR MESSAGE */}
             {error && (
               <p className="text-sm text-red-500">{error}</p>
             )}
 
-            <div className="text-right">
-              <a
-                href="/Forget"
-                className="text-sm text-green-600 hover:underline"
-              >
+            {/* LINKS */}
+            <div className="flex justify-between text-sm">
+              <a href="/Forget" className="text-green-600 hover:underline">
                 Forgot password?
+              </a>
+              <a href="/signup" className="text-green-600 hover:underline">
+                Create account
               </a>
             </div>
 
+            {/* LOGIN BUTTON */}
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-3 rounded-lg
-                         font-semibold hover:bg-green-700 transition"
+              disabled={!isFormValid || loading}
+              className={`w-full py-3 rounded-lg font-semibold
+                transition-all duration-300
+                ${
+                  isFormValid && !loading
+                    ? "bg-green-600 text-white hover:bg-green-700"
+                    : "bg-green-600 text-white opacity-40 cursor-not-allowed"
+                }`}
             >
-              LOGIN
+              {loading ? "Logging in..." : "LOGIN"}
             </button>
           </form>
-
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Don’t have an account?{" "}
-            <a href="#" className="text-green-600 font-medium hover:underline">
-              Create an account
-            </a>
-          </p>
-
         </div>
       </div>
     </div>
